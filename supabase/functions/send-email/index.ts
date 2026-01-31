@@ -1,3 +1,5 @@
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+
 // @ts-ignore
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 // @ts-ignore
@@ -9,10 +11,13 @@ const corsHeaders = {
 }
 
 // Gmail SMTP configuration (preferred)
+// @ts-ignore: Deno runtime available in Supabase Edge Functions
 const GMAIL_USER = Deno.env.get('GMAIL_USER')
+// @ts-ignore: Deno runtime available in Supabase Edge Functions
 const GMAIL_APP_PASSWORD = Deno.env.get('GMAIL_APP_PASSWORD')
 
 // Resend API key (fallback)
+// @ts-ignore: Deno runtime available in Supabase Edge Functions
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 
 interface EmailRequest {
