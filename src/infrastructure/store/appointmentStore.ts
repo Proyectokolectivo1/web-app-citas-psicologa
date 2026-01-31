@@ -8,7 +8,7 @@ import type {
     TimeSlot,
     AvailabilityOverride
 } from '../../domain/entities'
-import { addMinutes, format, isBefore, isAfter, startOfDay, endOfDay } from 'date-fns'
+import { addMinutes, format, isBefore, startOfDay, endOfDay } from 'date-fns'
 import { generateConfirmationEmail, generateCancellationEmail, generateAdminCancellationNotice } from '../utils/emailTemplates'
 
 interface AppointmentState {
@@ -704,7 +704,7 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
     },
 
     getAvailableSlots: async (date: Date, duration: number = 60) => {
-        const { availability, availabilityOverrides, appointments } = get()
+        const { availability, availabilityOverrides } = get()
         const dayOfWeek = date.getDay()
         const dateStr = format(date, 'yyyy-MM-dd')
 
@@ -725,12 +725,28 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
 
         if (activeSlots.length === 0) return []
 
-        // Get existing appointments for this day
+        // IMPORTANT: Fetch ALL appointments for this day using a SECURE RPC function
+        // This solves the RLS issue where patients couldn't see other patients' bookings
         const dayStart = startOfDay(date)
-        const dayAppointments = appointments.filter(apt => {
-            const aptDate = startOfDay(apt.startTime)
-            return aptDate.getTime() === dayStart.getTime() && apt.status !== 'cancelled'
-        })
+        const dayEnd = endOfDay(date)
+
+        const { data: allDayAppointments, error } = await (supabase as any)
+            .rpc('get_busy_slots', {
+                p_start_time: dayStart.toISOString(),
+                p_end_time: dayEnd.toISOString()
+            })
+
+        if (error) {
+            console.error('Error fetching busy slots:', error)
+        }
+
+        // Convert DB appointments to Date objects
+        const dayAppointments: { startTime: Date; endTime: Date }[] = (allDayAppointments || []).map((apt: any) => ({
+            startTime: new Date(apt.start_time),
+            endTime: new Date(apt.end_time)
+        }))
+
+        console.log(`[getAvailableSlots] Date: ${dateStr}, Found ${dayAppointments.length} existing appointments`)
 
         const slots: TimeSlot[] = []
 
@@ -759,16 +775,14 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
 
                 // Check if slot overlaps with any existing appointment
                 const isAvailable = !dayAppointments.some(apt => {
-                    return (
-                        (isAfter(slotStart, apt.startTime) || slotStart.getTime() === apt.startTime.getTime()) &&
-                        isBefore(slotStart, apt.endTime)
-                    ) || (
-                            isAfter(slotEnd, apt.startTime) &&
-                            (isBefore(slotEnd, apt.endTime) || slotEnd.getTime() === apt.endTime.getTime())
-                        ) || (
-                            (isBefore(slotStart, apt.startTime) || slotStart.getTime() === apt.startTime.getTime()) &&
-                            (isAfter(slotEnd, apt.endTime) || slotEnd.getTime() === apt.endTime.getTime())
-                        )
+                    // Check for any overlap between slot and appointment
+                    const slotStartTime = slotStart.getTime()
+                    const slotEndTime = slotEnd.getTime()
+                    const aptStartTime = apt.startTime.getTime()
+                    const aptEndTime = apt.endTime.getTime()
+
+                    // Two time ranges overlap if one starts before the other ends
+                    return slotStartTime < aptEndTime && slotEndTime > aptStartTime
                 })
 
                 slots.push({
