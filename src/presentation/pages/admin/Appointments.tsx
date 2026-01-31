@@ -354,11 +354,22 @@ export default function AdminAppointments() {
                             <div className="p-6 space-y-4">
                                 {/* Patient Contact Info */}
                                 {selectedAppointment.patient?.phone && (
-                                    <div className="flex items-center gap-3 text-slate-600 dark:text-slate-300">
-                                        <Phone className="w-5 h-5 text-[var(--color-primary)]" />
-                                        <a href={`tel:${selectedAppointment.patient.phone}`} className="hover:text-[var(--color-primary)]">
-                                            {selectedAppointment.patient.phone}
-                                        </a>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3 text-slate-600 dark:text-slate-300">
+                                            <Phone className="w-5 h-5 text-[var(--color-primary)]" />
+                                            <a href={`tel:${selectedAppointment.patient.phone}`} className="hover:text-[var(--color-primary)]">
+                                                {selectedAppointment.patient.phone}
+                                            </a>
+                                        </div>
+                                        <motion.a
+                                            href={`tel:${selectedAppointment.patient.phone}`}
+                                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600 text-sm font-medium hover:bg-green-100 dark:hover:bg-green-900/50"
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                        >
+                                            <Phone className="w-4 h-4" />
+                                            Llamar
+                                        </motion.a>
                                     </div>
                                 )}
                                 {(selectedAppointment.patient as any)?.residence && (
