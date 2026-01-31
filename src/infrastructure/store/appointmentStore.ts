@@ -285,7 +285,7 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
             // First, get the appointment with google_event_id from database
             const { data: appointmentData, error: fetchError } = await supabase
                 .from('appointments')
-                .select('*, patient:profiles!appointments_patient_id_fkey(email, full_name)')
+                .select('*, patient:profiles!appointments_patient_id_fkey(email, full_name, phone)')
                 .eq('id', input.appointmentId)
                 .single()
 
@@ -367,7 +367,7 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
                 const adminNoticeHtml = generateAdminCancellationNotice({
                     patientName: appointmentData.patient.full_name || 'Paciente',
                     patientEmail: appointmentData.patient.email,
-                    patientPhone: (appointmentData.patient as any)?.phone,
+                    patientPhone: appointmentData.patient.phone || undefined,
                     startTime: new Date(appointmentData.start_time),
                     reason: input.reason
                 })
