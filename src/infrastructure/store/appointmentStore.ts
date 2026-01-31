@@ -256,13 +256,20 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
                         }
                     })
 
-                    if (calendarError) {
-                        console.error('❌ Error invocando función Google Calendar:', calendarError)
-                        // No lanzamos error para no revertir la cita en BD, pero avisamos
-                    } else if (calendarData?.error) {
-                        console.error('❌ Error devuelto por Google Calendar:', calendarData.error)
+                    if (calendarError || calendarData?.error) {
+                        console.error('❌ Fallo en sincronización Google Calendar. Iniciando diagnóstico...')
+
+                        // Auto-run debug action to help user fix it
+                        const { data: debugInfo } = await supabase.functions.invoke('create-google-event', {
+                            body: { action: 'debug' }
+                        })
+                        console.warn('🔍 REPORTE DE DIAGNÓSTICO (Mostrar al desarrollador):', debugInfo)
+
+                        alert('La cita se guardó en el sistema, pero hubo un error sincronizando con Google Calendar. Por favor verifica tu calendario manualmente.\n\nRevisa la consola (F12) para ver el reporte de error.')
                     } else if (calendarData?.eventId) {
                         console.log('✅ Evento creado en Google Calendar:', calendarData.eventId)
+                        if (calendarData.info) console.log('ℹ️ Info adicional:', calendarData.info)
+
                         await supabase
                             .from('appointments')
                             .update({ google_event_id: calendarData.eventId })
