@@ -116,24 +116,42 @@ serve(async (req: Request) => {
         let gcalUrl = baseUrl
         let method = 'POST'
         let payload = undefined
+        // sendUpdates: 'all' sends email notifications to all attendees including patients
+        const sendUpdates = 'all'
 
         if (action === 'create') {
             method = 'POST'
-            payload = eventData
+            // Add additional properties for better event experience
+            payload = {
+                ...eventData,
+                // Allow guests to see other attendees
+                guestsCanSeeOtherGuests: true,
+                // Send reminders to attendees
+                reminders: {
+                    useDefault: false,
+                    overrides: [
+                        { method: 'email', minutes: 1440 }, // 24 hours before
+                        { method: 'popup', minutes: 60 },    // 1 hour before
+                        { method: 'popup', minutes: 15 }     // 15 minutes before
+                    ]
+                }
+            }
+            gcalUrl = `${baseUrl}?sendUpdates=${sendUpdates}`
         } else if (action === 'update' || action === 'reschedule') {
             if (!eventId) throw new Error('Event ID required for update')
-            gcalUrl = `${baseUrl}/${eventId}`
+            gcalUrl = `${baseUrl}/${eventId}?sendUpdates=${sendUpdates}`
             method = 'PATCH' // PATCH is safer than PUT as it sets only fields present
             payload = eventData
         } else if (action === 'delete' || action === 'cancel') {
             if (!eventId) throw new Error('Event ID required for delete')
-            gcalUrl = `${baseUrl}/${eventId}`
+            gcalUrl = `${baseUrl}/${eventId}?sendUpdates=${sendUpdates}`
             method = 'DELETE'
         } else {
             throw new Error(`Unknown action: ${action}`)
         }
 
         console.log(`Executing GCal ${action} (${method}) on ${gcalUrl}`)
+        console.log(`Attendees in payload:`, JSON.stringify(payload?.attendees))
 
         const response = await fetch(gcalUrl, {
             method,
