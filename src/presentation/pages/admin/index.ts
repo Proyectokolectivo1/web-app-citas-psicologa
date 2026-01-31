@@ -1,0 +1,6 @@
+export { default as AdminDashboard } from './Dashboard'
+export { default as AdminPatients } from './Patients'
+export { default as AdminAppointments } from './Appointments'
+export { default as AdminResources } from './Resources'
+export { default as AdminAvailability } from './Availability'
+export { default as AdminSettings } from './Settings'

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Audit Report - Antigravity</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            color: #1f2937;
+        }
+
+        h1 {
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 1rem;
+            color: #111827;
+        }
+
+        h2 {
+            margin-top: 2rem;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .badge-ok {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-risk {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .card {
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        code {
+            background: #f3f4f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+            font-family: monospace;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Security Audit Report</h1>
+
+    <div style="margin-bottom: 2rem; color: #6b7280;">
+        <strong>Date:</strong> 2026-01-30<br>
+        <strong>Auditor:</strong> Antigravity (AI Secure Code Auditor)
+    </div>
+
+    <h2>🔐 Credenciales <span class="badge badge-ok">OK</span></h2>
+    <div class="card">
+        <ul>
+            <li><strong>API Keys:</strong> No se encontraron credenciales hardcodeadas.</li>
+            <li><strong>Google Calendar:</strong> Se utiliza <code>Deno.env.get</code> para
+                <code>GOOGLE_SERVICE_ACCOUNT_EMAIL</code> y <code>GOOGLE_PRIVATE_KEY</code> en la Edge Function
+                <code>create-google-event</code>.
+            </li>
+            <li><strong>Recomendación:</strong> Configurar los secretos en Supabase inmediatamente
+                (<code>supabase secrets set ...</code>).</li>
+        </ul>
+    </div>
+
+    <h2>🔐 Base de Datos Supabase <span class="badge badge-ok">OK</span></h2>
+    <div class="card">
+        <ul>
+            <li><strong>RLS:</strong> Sin cambios (mantiene estado seguro previo).</li>
+        </ul>
+    </div>
+
+    <h2>🔐 Arquitectura <span class="badge badge-ok">OK</span></h2>
+    <div class="card">
+        <ul>
+            <li><strong>Backend-for-Frontend:</strong> La lógica de autenticación con Google (JWT signing) ocurre
+                estrictamente en el servidor (Edge Function), protegiendo la Private Key.</li>
+            <li><strong>Frontend:</strong> <code>Settings.tsx</code> solo invoca la función, no maneja secretos.</li>
+        </ul>
+    </div>
+
+    <h2>🔐 Autenticación / Autorización <span class="badge badge-ok">OK</span></h2>
+    <div class="card">
+        <ul>
+            <li><strong>Service Account:</strong> Implementación correcta de JWT (RS256) para service-to-service auth.
+            </li>
+            <li><strong>Acceso:</strong> La función <code>create-google-event</code> utiliza la validación estándar de
+                Supabase.</li>
+        </ul>
+    </div>
+
+    <h2>🔐 Dependencias <span class="badge badge-ok">OK</span></h2>
+    <div class="card">
+        <ul>
+            <li><strong>jose:</strong> Se utiliza <code>https://deno.land/x/jose@v4.14.4/index.ts</code> para firma de
+                JWT. Librería estándar y segura.</li>
+        </ul>
+    </div>
+
+    <div
+        style="margin-top: 3rem; padding: 2rem; background: #ecfdf5; border: 1px solid #059669; border-radius: 1rem; text-align: center;">
+        <h2 style="justify-content: center; margin-top: 0; color: #047857;">RIESGO TOTAL: BAJO</h2>
+        <p style="font-size: 1.25rem; font-weight: bold; color: #064e3b;">DEPLOY RECOMENDADO: SÍ</p>
+    </div>
+
+    <h2>🧩 DETALLES</h2>
+    <div class="card">
+        <ul>
+            <li><strong>Archivo:</strong> <code>supabase/functions/create-google-event/index.ts</code></li>
+            <li><strong>Cambio:</strong> Implementación real de integración con Google Calendar.</li>
+            <li><strong>Observación:</strong> Crítico configurar <code>GOOGLE_PRIVATE_KEY</code> correctamente en
+                formato PEM (asegurar saltos de línea <code>\n</code>).</li>
+        </ul>
+    </div>
+</body>
+
+</html>

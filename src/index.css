@@ -1,0 +1,174 @@
+@import "tailwindcss";
+
+/* ===============================================
+   AMA-NACER DESIGN SYSTEM
+   Emotional, calm, professional psychology app
+   =============================================== */
+
+/* Custom CSS Variables */
+@theme {
+  /* Primary Colors - Warm Gold from butterfly logo */
+  --color-primary: #C5A059;
+  --color-primary-light: #D4B76E;
+  --color-primary-dark: #B08E45;
+  
+  /* Background Colors */
+  --color-background-light: #FDF8F3;
+  --color-background-dark: #12100E;
+  
+  /* Surface Colors */
+  --color-surface-light: #FFFFFF;
+  --color-surface-dark: #1A1816;
+  
+  /* Text Colors */
+  --color-text-primary-light: #1E1B18;
+  --color-text-primary-dark: #F5F0EB;
+  --color-text-secondary-light: #6B6560;
+  --color-text-secondary-dark: #A39E99;
+  
+  /* Status Colors */
+  --color-success: #4CAF50;
+  --color-success-light: #66BB6A;
+  --color-warning: #FF9800;
+  --color-warning-light: #FFB74D;
+  --color-error: #E57373;
+  --color-error-light: #EF5350;
+  
+  /* Fonts */
+  --font-display: 'Playfair Display', serif;
+  --font-sans: 'Inter', sans-serif;
+  
+  /* Border Radius */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-2xl: 2.5rem;
+  
+  /* Shadows */
+  --shadow-soft: 0 4px 20px rgba(197, 160, 89, 0.08);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-elevated: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* Base Styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background-light);
+  color: var(--color-text-primary-light);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark body {
+  background-color: var(--color-background-dark);
+  color: var(--color-text-primary-dark);
+}
+
+/* Typography */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 3px;
+  opacity: 0.5;
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* Focus States */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Transition Defaults */
+* {
+  transition-property: color, background-color, border-color, box-shadow;
+  transition-duration: 200ms;
+  transition-timing-function: ease-out;
+}
+
+/* FullCalendar Custom Styles */
+.fc {
+  font-family: var(--font-sans) !important;
+}
+
+.fc .fc-toolbar-title {
+  font-family: var(--font-display) !important;
+  font-weight: 500;
+}
+
+.fc .fc-button-primary {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
+}
+
+.fc .fc-daygrid-day-number,
+.fc .fc-col-header-cell-cushion {
+  color: inherit;
+}
+
+.fc .fc-event {
+  border-radius: var(--radius-sm);
+  border: none;
+  padding: 2px 6px;
+}
+
+/* Loader Animation */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* Fade In Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
