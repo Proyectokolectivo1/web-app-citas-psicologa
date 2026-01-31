@@ -242,6 +242,12 @@ export default function AdminAppointments() {
                             center: 'title',
                             right: 'dayGridMonth,timeGridWeek'
                         }}
+                        buttonText={{
+                            today: 'Hoy',
+                            month: 'Mes',
+                            week: 'Semana',
+                            day: 'Día'
+                        }}
                         locale={es}
                         events={calendarEvents}
                         eventClick={(info) => {
