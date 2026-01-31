@@ -124,15 +124,12 @@ serve(async (req: Request) => {
             // Add additional properties for better event experience
             payload = {
                 ...eventData,
-                // Allow guests to see other attendees
                 guestsCanSeeOtherGuests: true,
-                // Send reminders to attendees
                 reminders: {
                     useDefault: false,
                     overrides: [
                         { method: 'email', minutes: 1440 }, // 24 hours before
-                        { method: 'popup', minutes: 60 },    // 1 hour before
-                        { method: 'popup', minutes: 15 }     // 15 minutes before
+                        { method: 'popup', minutes: 60 }     // 1 hour before
                     ]
                 }
             }
@@ -140,7 +137,7 @@ serve(async (req: Request) => {
         } else if (action === 'update' || action === 'reschedule') {
             if (!eventId) throw new Error('Event ID required for update')
             gcalUrl = `${baseUrl}/${eventId}?sendUpdates=${sendUpdates}`
-            method = 'PATCH' // PATCH is safer than PUT as it sets only fields present
+            method = 'PATCH' // PATCH is safer than PUT
             payload = eventData
         } else if (action === 'delete' || action === 'cancel') {
             if (!eventId) throw new Error('Event ID required for delete')
@@ -153,7 +150,7 @@ serve(async (req: Request) => {
         console.log(`Executing GCal ${action} (${method}) on ${gcalUrl}`)
         console.log(`Attendees in payload:`, JSON.stringify(payload?.attendees))
 
-        const response = await fetch(gcalUrl, {
+        let response = await fetch(gcalUrl, {
             method,
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
@@ -161,6 +158,40 @@ serve(async (req: Request) => {
             },
             body: payload ? JSON.stringify(payload) : undefined
         })
+
+        // --- FALLBACK LOGIC ---
+        // If creation fails (non-2xx), try simpler payload
+        if (!response.ok && action === 'create') {
+            const errorData = await response.json()
+            console.warn('⚠️ GCal creation failed with advanced params:', JSON.stringify(errorData))
+
+            // Retry 1: Remove reminders (use default)
+            console.log('🔄 Retrying without custom reminders...')
+            const simplePayload = { ...eventData, reminders: { useDefault: true } }
+
+            response = await fetch(gcalUrl, { // still try with sendUpdates
+                method,
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(simplePayload)
+            })
+
+            if (!response.ok) {
+                // Retry 2: Remove sendUpdates (maybe notifications are blocked)
+                console.log('🔄 Retrying without sendUpdates...')
+                const fallbackUrl = baseUrl // no query params
+                response = await fetch(fallbackUrl, {
+                    method,
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(simplePayload) // still default reminders
+                })
+            }
+        }
 
         // DELETE 204 No Content
         if (method === 'DELETE' && response.status === 204) {

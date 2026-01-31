@@ -233,39 +233,48 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
                 }
 
                 // Sync with Google Calendar
-                supabase.functions.invoke('create-google-event', {
-                    body: {
-                        event: {
-                            summary: `🌸 Ama Nacer - ${data.appointment_type === 'virtual' ? 'Sesión Virtual' : 'Sesión Presencial'} - ${data.patient?.full_name || 'Paciente'}`,
-                            description: `Cita de Psicología - Ama Nacer\\n\\n📋 Notas: ${data.notes || 'Ninguna'}\\n\\n📧 Email: ${data.patient?.email || 'No disponible'}\\n📱 Teléfono: ${data.patient?.phone || 'No disponible'}`,
-                            start: {
-                                dateTime: data.start_time,
-                                timeZone: 'America/Bogota'
-                            },
-                            end: {
-                                dateTime: data.end_time,
-                                timeZone: 'America/Bogota'
-                            },
-                            attendees: data.patient?.email ? [
-                                { email: data.patient.email, displayName: data.patient.full_name }
-                            ] : []
+                try {
+                    console.log('📅 Iniciando sincronización con Google Calendar...')
+                    const { data: calendarData, error: calendarError } = await supabase.functions.invoke('create-google-event', {
+                        body: {
+                            action: 'create',
+                            event: {
+                                summary: `🌸 Ama Nacer - ${data.appointment_type === 'virtual' ? 'Sesión Virtual' : 'Sesión Presencial'} - ${data.patient?.full_name || 'Paciente'}`,
+                                description: `Cita de Psicología - Ama Nacer\n\n📋 Notas: ${data.notes || 'Ninguna'}\n\n📧 Email: ${data.patient?.email || 'No disponible'}\n📱 Teléfono: ${data.patient?.phone || 'No disponible'}`,
+                                start: {
+                                    dateTime: data.start_time,
+                                    timeZone: 'America/Bogota'
+                                },
+                                end: {
+                                    dateTime: data.end_time,
+                                    timeZone: 'America/Bogota'
+                                },
+                                attendees: data.patient?.email ? [
+                                    { email: data.patient.email, displayName: data.patient.full_name || 'Paciente' }
+                                ] : []
+                            }
                         }
-                    }
-                }).then(async ({ data: calendarData, error: calendarError }) => {
+                    })
+
                     if (calendarError) {
-                        console.error('Error creating Google Calendar event:', calendarError)
+                        console.error('❌ Error invocando función Google Calendar:', calendarError)
+                        // No lanzamos error para no revertir la cita en BD, pero avisamos
+                    } else if (calendarData?.error) {
+                        console.error('❌ Error devuelto por Google Calendar:', calendarData.error)
                     } else if (calendarData?.eventId) {
-                        console.log('Google Calendar event created:', calendarData.eventId)
+                        console.log('✅ Evento creado en Google Calendar:', calendarData.eventId)
                         await supabase
                             .from('appointments')
                             .update({ google_event_id: calendarData.eventId })
                             .eq('id', data.id)
                     }
-                }).catch(e => console.error('GCal sync error:', e))
+                } catch (calErr) {
+                    console.error('❌ Excepción al sincronizar calendario:', calErr)
+                }
             }
 
             // Trigger integrations without awaiting
-            processIntegrations()
+            // processIntegrations() // Ya manejamos el calendario arriba, dejamos processIntegrations para emails si es necesario
 
             return appointment
         } catch (error: any) {
