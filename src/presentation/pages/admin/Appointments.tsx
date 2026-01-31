@@ -164,15 +164,30 @@ export default function AdminAppointments() {
 
     const calendarEvents = appointments
         .filter(apt => filterStatus === 'all' || apt.status === filterStatus)
-        .map(apt => ({
-            id: apt.id,
-            title: apt.patient?.fullName || 'Paciente',
-            start: apt.startTime,
-            end: apt.endTime,
-            backgroundColor: apt.status === 'confirmed' ? '#22c55e' : apt.status === 'pending' ? '#f59e0b' : '#ef4444',
-            borderColor: 'transparent',
-            extendedProps: { appointment: apt }
-        }))
+        .map(apt => {
+            // Color mapping based on status
+            let bgColor = '#f59e0b' // Default: amber for pending
+            let txtColor = '#ffffff'
+
+            if (apt.status === 'confirmed') {
+                bgColor = '#22c55e' // Green
+            } else if (apt.status === 'cancelled') {
+                bgColor = '#ef4444' // Red
+            } else if (apt.status === 'completed') {
+                bgColor = '#64748b' // Slate/gray
+            }
+
+            return {
+                id: apt.id,
+                title: apt.patient?.fullName || 'Paciente',
+                start: apt.startTime,
+                end: apt.endTime,
+                backgroundColor: bgColor,
+                borderColor: bgColor,
+                textColor: txtColor,
+                extendedProps: { appointment: apt }
+            }
+        })
 
     const filteredAppointments = appointments
         .filter(apt => filterStatus === 'all' || apt.status === filterStatus)
