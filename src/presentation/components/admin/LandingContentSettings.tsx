@@ -22,12 +22,17 @@ interface LandingContent {
     feature3_title: string
     feature3_subtitle: string
 
-    // Appointment Types
+    // Appointment Types & Pricing
+    tariffs_label: string
     virtual_title: string
     virtual_description: string
     virtual_badge: string
+    virtual_price: string
     presencial_title: string
     presencial_description: string
+    presencial_price: string
+    session_duration: string
+    session_type_label: string
 
     // Final Quote
     final_quote: string
@@ -53,11 +58,16 @@ const DEFAULT_CONTENT: LandingContent = {
     feature3_title: 'Flexible',
     feature3_subtitle: 'Virtual o presencial',
 
+    tariffs_label: `Tarifas ${new Date().getFullYear()}`,
     virtual_title: 'Cita Virtual',
     virtual_description: 'Atención flexible desde cualquier lugar. Sesiones por videollamada con la misma calidad y calidez.',
     virtual_badge: 'Preferida',
+    virtual_price: '120.000 COP',
     presencial_title: 'Cita Presencial',
     presencial_description: 'Sesión física en consultorio ubicado en Los Ángeles. Un ambiente cálido y profesional.',
+    presencial_price: '110.000 COP',
+    session_duration: '60 min',
+    session_type_label: 'Sesión Individual',
 
     final_quote: '"Un nuevo sol es la oportunidad de re-nacer cada día."',
 
@@ -164,8 +174,8 @@ export function LandingContentSettings() {
                         onClick={handleSave}
                         disabled={isSaving}
                         className={`px-6 py-2 rounded-xl font-medium flex items-center gap-2 ${saved
-                                ? 'bg-green-500 text-white'
-                                : 'bg-primary text-white hover:bg-primary-dark'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-primary text-white hover:bg-primary-dark'
                             }`}
                     >
                         {isSaving ? (
@@ -187,8 +197,8 @@ export function LandingContentSettings() {
                         key={id}
                         onClick={() => setActiveSection(id)}
                         className={`flex-1 min-w-[120px] py-2 px-4 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all ${activeSection === id
-                                ? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
-                                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                            ? 'bg-white dark:bg-gray-700 text-primary shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                             }`}
                     >
                         <Icon className="w-4 h-4" />
@@ -421,20 +431,69 @@ export function LandingContentSettings() {
                     >
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                             <DollarSign className="w-5 h-5 text-primary" />
-                            Tipos de Cita
+                            Tipos de Cita y Tarifas
                         </h3>
+
+                        {/* General Pricing Settings */}
+                        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl space-y-4">
+                            <span className="text-yellow-600 font-medium">💰 Configuración General de Precios</span>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Etiqueta de Tarifas</label>
+                                    <input
+                                        type="text"
+                                        value={content.tariffs_label}
+                                        onChange={(e) => updateField('tariffs_label', e.target.value)}
+                                        placeholder="Tarifas 2026"
+                                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Duración Sesión</label>
+                                    <input
+                                        type="text"
+                                        value={content.session_duration}
+                                        onChange={(e) => updateField('session_duration', e.target.value)}
+                                        placeholder="60 min"
+                                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Tipo de Sesión</label>
+                                <input
+                                    type="text"
+                                    value={content.session_type_label}
+                                    onChange={(e) => updateField('session_type_label', e.target.value)}
+                                    placeholder="Sesión Individual"
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
+                                />
+                            </div>
+                        </div>
 
                         {/* Virtual */}
                         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl space-y-4">
                             <span className="text-blue-600 font-medium">💻 Cita Virtual</span>
-                            <div>
-                                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Título</label>
-                                <input
-                                    type="text"
-                                    value={content.virtual_title}
-                                    onChange={(e) => updateField('virtual_title', e.target.value)}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Título</label>
+                                    <input
+                                        type="text"
+                                        value={content.virtual_title}
+                                        onChange={(e) => updateField('virtual_title', e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Precio</label>
+                                    <input
+                                        type="text"
+                                        value={content.virtual_price}
+                                        onChange={(e) => updateField('virtual_price', e.target.value)}
+                                        placeholder="120.000 COP"
+                                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
+                                    />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Descripción</label>
@@ -459,14 +518,26 @@ export function LandingContentSettings() {
                         {/* Presencial */}
                         <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl space-y-4">
                             <span className="text-green-600 font-medium">🏥 Cita Presencial</span>
-                            <div>
-                                <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Título</label>
-                                <input
-                                    type="text"
-                                    value={content.presencial_title}
-                                    onChange={(e) => updateField('presencial_title', e.target.value)}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Título</label>
+                                    <input
+                                        type="text"
+                                        value={content.presencial_title}
+                                        onChange={(e) => updateField('presencial_title', e.target.value)}
+                                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Precio</label>
+                                    <input
+                                        type="text"
+                                        value={content.presencial_price}
+                                        onChange={(e) => updateField('presencial_price', e.target.value)}
+                                        placeholder="110.000 COP"
+                                        className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800"
+                                    />
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm text-gray-600 dark:text-gray-400 mb-1">Descripción</label>
@@ -478,11 +549,6 @@ export function LandingContentSettings() {
                                 />
                             </div>
                         </div>
-
-                        <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                            <DollarSign className="w-4 h-4" />
-                            Los precios se configuran en la sección de "Precios" arriba
-                        </p>
                     </motion.div>
                 )}
 

@@ -240,7 +240,7 @@ export default function Landing() {
                 <div className="max-w-6xl mx-auto">
                     <div className="flex items-center justify-between mb-6 px-2">
                         <h2 className="font-display text-2xl lg:text-3xl font-semibold">Agendar Cita</h2>
-                        <span className="text-[10px] lg:text-xs uppercase tracking-widest text-slate-400">Tarifas 2024</span>
+                        <span className="text-[10px] lg:text-xs uppercase tracking-widest text-slate-400">{content.tariffs_label}</span>
                     </div>
 
                     <div className="grid gap-4 lg:grid-cols-2 lg:gap-8">
@@ -265,11 +265,11 @@ export default function Landing() {
 
                             <div className="flex justify-between items-center border-t border-slate-50 dark:border-zinc-800 pt-3 lg:pt-4">
                                 <div className="flex flex-col">
-                                    <span className="text-[var(--color-primary)] font-bold text-xl lg:text-2xl">120.000 COP</span>
-                                    <span className="text-[10px] lg:text-xs text-slate-400 uppercase tracking-tighter">Sesión Individual</span>
+                                    <span className="text-[var(--color-primary)] font-bold text-xl lg:text-2xl">{content.virtual_price}</span>
+                                    <span className="text-[10px] lg:text-xs text-slate-400 uppercase tracking-tighter">{content.session_type_label}</span>
                                 </div>
                                 <span className="text-xs lg:text-sm font-medium px-2 py-1 lg:px-3 lg:py-1.5 bg-slate-100 dark:bg-zinc-800 rounded-md text-slate-500">
-                                    60 min
+                                    {content.session_duration}
                                 </span>
                             </div>
                         </motion.div>
@@ -292,11 +292,11 @@ export default function Landing() {
 
                             <div className="flex justify-between items-center border-t border-slate-50 dark:border-zinc-800 pt-3 lg:pt-4">
                                 <div className="flex flex-col">
-                                    <span className="text-[var(--color-primary)] font-bold text-xl lg:text-2xl">110.000 COP</span>
-                                    <span className="text-[10px] lg:text-xs text-slate-400 uppercase tracking-tighter">Sesión Individual</span>
+                                    <span className="text-[var(--color-primary)] font-bold text-xl lg:text-2xl">{content.presencial_price}</span>
+                                    <span className="text-[10px] lg:text-xs text-slate-400 uppercase tracking-tighter">{content.session_type_label}</span>
                                 </div>
                                 <span className="text-xs lg:text-sm font-medium px-2 py-1 lg:px-3 lg:py-1.5 bg-slate-100 dark:bg-zinc-800 rounded-md text-slate-500">
-                                    60 min
+                                    {content.session_duration}
                                 </span>
                             </div>
                         </motion.div>
