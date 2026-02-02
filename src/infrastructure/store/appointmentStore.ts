@@ -9,7 +9,7 @@ import type {
     AvailabilityOverride
 } from '../../domain/entities'
 import { addMinutes, format, isBefore, startOfDay, endOfDay } from 'date-fns'
-import { generateConfirmationEmail, generateCancellationEmail, generateAdminCancellationNotice } from '../utils/emailTemplates'
+import { generateConfirmationEmail, generateCancellationEmail, generateAdminCancellationNotice, generateRescheduleEmail } from '../utils/emailTemplates'
 
 interface AppointmentState {
     appointments: Appointment[]
@@ -281,7 +281,7 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
             }
 
             // Trigger integrations without awaiting
-            // processIntegrations() // Ya manejamos el calendario arriba, dejamos processIntegrations para emails si es necesario
+            processIntegrations()
 
             return appointment
         } catch (error: any) {
@@ -695,19 +695,45 @@ export const useAppointmentStore = create<AppointmentState>((set, get) => ({
 
             // Sync with Google Calendar
             const appointment = get().appointments.find(a => a.id === appointmentId)
-            if (appointment?.googleEventId) {
-                supabase.functions.invoke('create-google-event', {
-                    body: {
-                        action: 'update',
-                        eventId: appointment.googleEventId,
-                        event: {
-                            start: { dateTime: newStartTime.toISOString(), timeZone: 'America/Bogota' },
-                            end: { dateTime: newEndTime.toISOString(), timeZone: 'America/Bogota' }
+
+            if (appointment) {
+                // Notificar al paciente por correo
+                if (appointment.patient && appointment.patient.email) {
+                    console.log('📧 Notification reschedule to:', appointment.patient.email)
+                    const emailHtml = generateRescheduleEmail({
+                        patientName: appointment.patient.fullName || 'Paciente',
+                        oldStartTime: appointment.startTime,
+                        newStartTime: newStartTime,
+                        newEndTime: newEndTime,
+                        appointmentType: appointment.appointmentType === 'virtual' ? 'virtual' : 'in-person'
+                    })
+
+                    supabase.functions.invoke('send-email', {
+                        body: {
+                            to: appointment.patient.email,
+                            subject: '📅 Cita Reagendada - Ama Nacer Psicología',
+                            html: emailHtml
                         }
-                    }
-                }).then(({ error }) => {
-                    if (error) console.error('Error updating GCal event:', error)
-                })
+                    }).then(({ error }) => {
+                        if (error) console.error('Error sending reschedule email:', error)
+                        else console.log('✅ Reschedule email sent')
+                    })
+                }
+
+                if (appointment.googleEventId) {
+                    supabase.functions.invoke('create-google-event', {
+                        body: {
+                            action: 'update',
+                            eventId: appointment.googleEventId,
+                            event: {
+                                start: { dateTime: newStartTime.toISOString(), timeZone: 'America/Bogota' },
+                                end: { dateTime: newEndTime.toISOString(), timeZone: 'America/Bogota' }
+                            }
+                        }
+                    }).then(({ error }) => {
+                        if (error) console.error('Error updating GCal event:', error)
+                    })
+                }
             }
 
             await get().fetchAppointments()
