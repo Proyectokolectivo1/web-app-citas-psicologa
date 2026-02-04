@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Calendar, FileText, Clock, ChevronRight, Sparkles, Phone } from 'lucide-react'
+import { Calendar, FileText, Clock, ChevronRight, Sparkles, Phone, MapPin } from 'lucide-react'
 import { useAuthStore, useAppointmentStore, useSettingsStore } from '../../../infrastructure/store'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -9,7 +9,17 @@ import { es } from 'date-fns/locale'
 export default function PatientDashboard() {
     const { profile } = useAuthStore()
     const { appointments, fetchAppointments, isLoading } = useAppointmentStore()
-    const { supportContacts, fetchSupportContacts } = useSettingsStore()
+    const { supportContacts, fetchSupportContacts, fetchSetting } = useSettingsStore()
+
+    const [locationUrl, setLocationUrl] = useState('https://maps.google.com/?q=6.174649,-75.346703')
+
+    useEffect(() => {
+        const loadLoc = async () => {
+            const val = await fetchSetting('location_url')
+            if (val) setLocationUrl(val)
+        }
+        loadLoc()
+    }, [])
 
     useEffect(() => {
         if (profile?.id) {
@@ -187,9 +197,20 @@ export default function PatientDashboard() {
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
-                                        {apt.appointmentType === 'virtual' ? '📹 Virtual' : '📍 Presencial'}
-                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[var(--color-text-secondary-light)] dark:text-[var(--color-text-secondary-dark)]">
+                                            {apt.appointmentType === 'virtual' ? '📹 Virtual' : '📍 Presencial'}
+                                        </span>
+                                        {apt.appointmentType === 'presencial' && (
+                                            <button
+                                                onClick={() => window.open(locationUrl, '_blank')}
+                                                className="text-xs flex items-center gap-1 text-green-600 hover:text-green-700 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-lg transition-colors"
+                                            >
+                                                <MapPin className="w-3 h-3" />
+                                                Ver Mapa
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </motion.div>
                         ))}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Settings, DollarSign, Clock, Save, Check, ExternalLink, AlertCircle, Image as ImageIcon, Sparkles, Upload, Phone, Trash2, Plus, UserPlus } from 'lucide-react'
+import { Settings, DollarSign, Clock, Save, Check, ExternalLink, AlertCircle, Image as ImageIcon, Sparkles, Upload, Phone, Trash2, Plus, UserPlus, MapPin } from 'lucide-react'
 import { supabase } from '../../../infrastructure/supabase/client'
 import { useSettingsStore } from '../../../infrastructure/store'
 import { EmailTemplatesSettings } from '../../components/admin/EmailTemplatesSettings'
@@ -11,6 +11,7 @@ interface AppSettings {
     virtual_price: { amount: number; currency: string }
     presencial_price: { amount: number; currency: string }
     google_calendar_connected: { connected: boolean }
+    location_url?: string
 }
 
 export default function AdminSettings() {
@@ -33,7 +34,8 @@ export default function AdminSettings() {
         appointment_duration: { minutes: 60 },
         virtual_price: { amount: 120000, currency: 'COP' },
         presencial_price: { amount: 110000, currency: 'COP' },
-        google_calendar_connected: { connected: false }
+        google_calendar_connected: { connected: false },
+        location_url: 'https://maps.google.com/?q=6.174649,-75.346703'
     })
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
@@ -400,6 +402,43 @@ export default function AdminSettings() {
                             className="w-full max-w-xs px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-700 bg-transparent focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none"
                         />
                     </div>
+                </div>
+            </motion.div >
+
+            {/* Location Settings */}
+            < motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-[var(--color-primary)]/10"
+            >
+                <h2 className="font-display text-xl font-semibold mb-6 flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-[var(--color-primary)]" />
+                    Ubicación del Consultorio
+                </h2>
+
+                <div>
+                    <label className="block text-sm font-medium mb-2">URL de Google Maps</label>
+                    <div className="flex gap-2">
+                        <input
+                            type="text"
+                            value={settings.location_url || ''}
+                            onChange={(e) => setSettings(s => ({
+                                ...s,
+                                location_url: e.target.value
+                            }))}
+                            placeholder="https://maps.google.com/..."
+                            className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-700 bg-transparent focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 outline-none"
+                        />
+                        <button
+                            onClick={() => window.open(settings.location_url || 'https://maps.google.com', '_blank')}
+                            className="px-4 bg-slate-100 dark:bg-zinc-800 rounded-xl hover:bg-slate-200 transition-colors"
+                            title="Probar enlace"
+                        >
+                            <ExternalLink className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-2">Este enlace se mostrará a los pacientes con citas presenciales.</p>
                 </div>
             </motion.div >
 

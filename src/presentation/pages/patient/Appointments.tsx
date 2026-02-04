@@ -42,12 +42,16 @@ export default function PatientAppointments() {
     const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([])
     const [selectedSlot, setSelectedSlot] = useState<TimeSlot | null>(null)
     const [prices, setPrices] = useState({ virtual: 0, presencial: 0 })
+    const [locationUrl, setLocationUrl] = useState('https://maps.google.com/?q=6.174649,-75.346703')
 
     useEffect(() => {
         const loadPrices = async () => {
             try {
                 const vVal = await fetchSetting('virtual_price')
                 const pVal = await fetchSetting('presencial_price')
+                const locVal = await fetchSetting('location_url')
+
+                if (locVal) setLocationUrl(locVal)
 
                 // Handle potential different data types (string vs object) from DB
                 const parsePrice = (val: any) => {
@@ -427,6 +431,15 @@ export default function PatientAppointments() {
 
                                         {(apt.status === 'pending' || apt.status === 'confirmed') && (
                                             <div className="flex gap-2 ml-auto sm:ml-2">
+                                                {apt.appointmentType === 'presencial' && (
+                                                    <button
+                                                        onClick={() => window.open(locationUrl, '_blank')}
+                                                        className="p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl transition cursor-pointer"
+                                                        title="Ver Ubicación en Mapa"
+                                                    >
+                                                        <MapPin className="w-5 h-5" />
+                                                    </button>
+                                                )}
                                                 <button
                                                     onClick={() => startReschedule(apt)}
                                                     className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition cursor-pointer"
